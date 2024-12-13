@@ -10,7 +10,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <limits.h>
-#include <pthread.h>  // Include pthread library for multithreading
+#include <pthread.h>
 
 #define SERVERPORT 8989
 #define BUFSIZE 4096
