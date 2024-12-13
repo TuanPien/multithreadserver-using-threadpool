@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Data from Server</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #response {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Get Data from Server</h1>
+    <button id="fetchButton">Fetch Data</button>
+    
+    <div id="response"></div>
+
+    <script>
+        // Get references to elements
+        const fetchButton = document.getElementById('fetchButton');
+        const responseDiv = document.getElementById('response');
+
+        // Handle button click
+        fetchButton.addEventListener('click', function() {
+            // Make GET request to the server
+            fetch('https://c55d-2402-800-6117-41ae-1504-80ee-d04-89ea.ngrok-free.app')
+                .then(response => {
+                    // Check if the response is successful
+                    if (response.ok) {
+                        return response.text(); // Convert the response to text
+                    } else {
+                        throw new Error('Network response was not ok');
+                    }
+                })
+                .then(data => {
+                    // Display the response data
+                    responseDiv.textContent = 'Response from server: ' + data;
+                })
+                .catch(error => {
+                    // Handle errors
+                    responseDiv.textContent = 'Error: ' + error.message;
+                });
+        });
+    </script>
+
+</body>
+</html>
