@@ -1,0 +1,5 @@
+gcc -o server server.c -lws2_32 -pthread
+
+./server
+
+FOR /L %i IN (1,1,20) DO curl http://127.0.0.1:8989/ (test tren cmd)

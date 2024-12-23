@@ -87,12 +87,12 @@ int main(int argc, char **argv)
     signal(SIGINT, signal_handler);
     signal(SIGTERM, signal_handler);
     
-    log_file = fopen("server.log", "a");
+    const char *log_path = "C:/code/HeDieuHanh/Multithreaded-server-using-threadpool/server/multithreadserver-using-threadpool/server.log";
+    log_file = fopen(log_path, "a");
     if (!log_file) {
-        fprintf(stderr, "Failed to open log file\n");
+        fprintf(stderr, "Failed to open log file: %s\n", log_path);
         return 1;
     }
-
     int server_socket, client_socket, addr_size;
     SA_IN server_addr, client_addr;
 
