@@ -14,72 +14,78 @@
 #include <signal.h>
 #include <time.h>
 
-#define SERVERPORT 8989
-#define BUFSIZE 4096
-#define SOCKETERROR (-1)
-#define SERVER_BACKLOG 100
-#define THREAD_POOL_SIZE 20
-#define MAX_REQUEST_SIZE 8192
+#define SERVERPORT 8989 //cònfig port
+#define BUFSIZE 4096 //kich thuocws bộ đệmđệm
+#define SOCKETERROR (-1) 
+#define SERVER_BACKLOG 100 //số kết nối tối đađa
+#define THREAD_POOL_SIZE 20 //số lượng luồngluồng
+#define MAX_REQUEST_SIZE 8192 //kích thuoc tối đa requestrequest
 #define HTTP_OK "200 OK"
 #define HTTP_BAD_REQUEST "400 Bad Request"
 #define HTTP_NOT_FOUND "404 Not Found"
 #define HTTP_METHOD_NOT_ALLOWED "405 Method Not Allowed"
 
-pthread_t thread_pool[THREAD_POOL_SIZE];
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t condition = PTHREAD_COND_INITIALIZER;
+pthread_t thread_pool[THREAD_POOL_SIZE]; //mnagr chứa luồng trong tptp
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; // mutex đồng bộ truy cậpcập
+pthread_cond_t condition = PTHREAD_COND_INITIALIZER; //điều kiện chờ or đánh thứcthức
 
-typedef struct sockaddr_in SA_IN;
+typedef struct sockaddr_in SA_IN; 
 typedef struct sockaddr SA;
 
-int client_socket_queue[THREAD_POOL_SIZE];
-int queue_start = 0;
-int queue_end = 0;
+int client_socket_queue[THREAD_POOL_SIZE]; //hàng đợi vòng chứa các socket clientclient
+int queue_start = 0;//đầu 
+int queue_end = 0;//cuối hàng đợiđợi
 
-volatile sig_atomic_t server_running = 1;
-FILE *log_file = NULL;
+volatile sig_atomic_t server_running = 1; //cờ kiểm tra serverserver
+FILE *log_file = NULL; //tệp luư loglog
 
+//cấu trúc http request 
 typedef struct {
-    char method[16];
-    char path[256];
+    char method[16]; //get, post, delete,...
+    char path[256]; //đường dẫndẫn
     char version[16];
 } http_request_t;
 
+//hàm log messmess
 void log_message(const char *format, ...) {
-    time_t now;
+    time_t now;//lấy time hiện tại 
     time(&now);
-    char timestamp[64];
+    char timestamp[64];//định dạng thời gian 
     strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", localtime(&now));
 
-    va_list args;
+    va_list args;//tạo danh sách tham số động 
     va_start(args, format);
 
-    if (log_file) {
-        fprintf(log_file, "[%s] ", timestamp);
+//ghi vào tệp nhập ký 
+    if (log_file) { 
+        fprintf(log_file, "[%s] ", timestamp); //ghi timestamp vào tệp 
         vfprintf(log_file, format, args);
-        fprintf(log_file, "\n");
-        fflush(log_file);
+        fprintf(log_file, "\n"); // thêm dòng mới vào cuối 
+        fflush(log_file); //lưu ngay lập tức 
     }
     
-    printf("[%s] ", timestamp);
+    printf("[%s] ", timestamp); //in ra màn hình 
     vprintf(format, args);
     printf("\n");
     
-    va_end(args);
+    va_end(args);// giải phong tài nguyên 
 }
 
+//ngắt khi hoàn thành 
 void signal_handler(int sig) {
     server_running = 0;
 }
 
+//phân tichs http request 
 int parse_http_request(const char *buffer, http_request_t *request) {
-    return sscanf(buffer, "%15s %255s %15s", request->method, request->path, request->version) == 3;
+    return sscanf(buffer, "%15s %255s %15s", request->method, request->path, request->version) == 3; //trích xuất thông tin và trả về true nếu đúng 
 }
+
 
 void * handle_connection(void* p_client_socket);
 int check(int exp, const char *msg);
 void * thread_function(void *arg);
-void add_to_queue(int client_socket);
+void add_to_queue(int client_socket); 
 int get_from_queue();
 
 int main(int argc, char **argv)
